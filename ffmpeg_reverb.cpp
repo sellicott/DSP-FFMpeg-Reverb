@@ -245,12 +245,10 @@ int main(int argc, char** argv) {
           break;
       }
 
-      reverb.get_samples(buffer, play_struct.max_buffer_size);
-
       // create output packet
       AVPacket packet;
       av_init_packet(&packet);
-      packet.data = buffer;
+      packet.data = reverb.get_samples(buffer, play_struct.max_buffer_size);
       packet.size = play_struct.max_buffer_size;
 
       // write output packet to format context

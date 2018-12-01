@@ -3,16 +3,18 @@
 
 #include <cstdint>
 #include <memory>
-#include "CircularBuffer.h"
+#include <deque>
+#include "AllpassFilter.h"
+#include "CombFilter.h"
 
 using std::size_t;
 using std::uint8_t;
 
 using std::array;
-using buffPtr = std::unique_ptr<CircularBuffer<float>>;
 
 
 class ReverbUnit {
+using buffPtr = std::unique_ptr<std::deque<double>>;
 
 public:
   ReverbUnit(size_t outbuff_size_ = 512);
@@ -21,12 +23,23 @@ public:
   uint8_t* get_samples(uint8_t* samples, size_t num_samples);
 
 private:
-  float do_filtering(float new_x);
 
-  // multiply by 2 to make room for the L/R audio channels
-  const size_t sample_rate = 44100*2;
-  buffPtr input_samples;
-  buffPtr output_samples;
+  float reverb_gain;
+  AllpassFilter filter1;
+  AllpassFilter filter2;
+  AllpassFilter filter3;
+  AllpassFilter filter4;
+  AllpassFilter filter5;
+  CombFilter comb1;
+  CombFilter comb2;
+  CombFilter comb3;
+  CombFilter comb4;
+  buffPtr delay1;
+  buffPtr delay2;
+  buffPtr delay3;
+  double do_filtering(double new_x);
+
+  const size_t sample_rate = 44100;
   size_t outbuff_size;
 };
 
