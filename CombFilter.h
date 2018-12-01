@@ -3,7 +3,6 @@
 #define _COMB_FILTER_H_
 
 #include <memory>
-#include "CircularBuffer.h"
 #include <deque>
 
 using std::size_t;
