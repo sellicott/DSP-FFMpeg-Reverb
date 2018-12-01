@@ -1,7 +1,10 @@
-snippets := \
+#snippets := \
 	ffmpeg_decode \
 	ffmpeg_play \
-	ffmpeg_play_encoder 
+	ffmpeg_play_encoder \
+	ffmpeg_reverb 
+snippets := ffmpeg_reverb
+#	decode_audio
 
 all: $(snippets)
 
@@ -16,3 +19,9 @@ ffmpeg_play: ffmpeg_play.cpp Makefile
 
 ffmpeg_play_encoder: ffmpeg_play_encoder.cpp Makefile
 	g++ -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavdevice -lavutil
+
+ffmpeg_reverb: ffmpeg_reverb.cpp Makefile
+	g++ -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavdevice -lavutil -lswresample
+
+#decode_audio: decode_audio.cpp Makefile
+#	gcc -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavutil -lswresample
