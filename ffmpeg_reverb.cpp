@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string>
+#include <memory>
+#include "ReverbUnit.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -36,11 +38,14 @@ typedef struct ffmpeg_play_init_t {
   AVFormatContext* fmt_ctx;
   AVStream* stream;
   AVCodecContext* codec_ctx;
+  int max_buffer_size;
 } ffmpeg_play_t;
 
 // helper functions
 ffmpeg_decode_init_t init_ffmpeg_decoder(string filename, int out_samples = 512, int sample_rate = 44100); 
 ffmpeg_play_t init_ffmpeg_play(int in_channels = 2, int in_samples = 512, int sample_rate = 44100, int bitrate = 64000);
+
+
 
 void deinit_ffmpeg_decoder(ffmpeg_decode_init_t init_struct);
 void deinit_ffmpeg_play(ffmpeg_play_init_t init_struct);
@@ -136,7 +141,7 @@ ffmpeg_play_init_t init_ffmpeg_play(int in_channels, int in_samples, int sample_
 
   ffmpeg_play_init_t init_struct = {0};
 
-  const int max_buffer_size =
+  init_struct.max_buffer_size =
       av_samples_get_buffer_size(
           NULL, in_channels, in_samples, AV_SAMPLE_FMT_FLT, 1);
 
@@ -198,12 +203,13 @@ void deinit_ffmpeg_play(ffmpeg_play_init_t init_struct) {
 
 // ---------------------------------------------main --------------------------------------------------
 int main(int argc, char** argv) {
-  if (argc != 2) {
-      fprintf(stderr, "usage: %s input_file > output_file\n", argv[0]);
+  if (argc != 1) {
+      fprintf(stderr, "usage: %s < input_file\n", argv[0]);
       exit(1);
   }
 
   const int out_channels = 2, out_samples = 512, sample_rate = 44100;
+  ReverbUnit reverb(out_samples);
 
   // register supported formats and codecs
   av_register_all();
@@ -212,145 +218,50 @@ int main(int argc, char** argv) {
   avdevice_register_all();
 
   //initilize ffmpeg
-  auto decode_struct = init_ffmpeg_decoder(argv[1], out_samples);
   auto play_struct = init_ffmpeg_play();
   printf("everything initilized\n");
 
-  // create empty packet for input stream
-  AVPacket packet;
-  av_init_packet(&packet);
-  packet.data = NULL;
-  packet.size = 0;
-
-  // allocate empty frame for decoding
-  AVFrame* frame = av_frame_alloc();
-  assert(frame);
-
-  // allocate buffer for output stream
-  uint8_t* buffer = (uint8_t*)av_malloc(decode_struct.max_buffer_size);
+  // allocate buffer for input samples
+  uint8_t* buffer = (uint8_t*)av_malloc(play_struct.max_buffer_size);
   assert(buffer);
 
-  // read packet from input audio file
-  while (av_read_frame(decode_struct.fmt_ctx, &packet) >= 0) {
-    // skip non-audio packets
-    if (packet.stream_index != decode_struct.stream_idx) {
-        continue;
-    }
+  // initialze output device
+  if (avformat_write_header(play_struct.fmt_ctx, NULL) < 0) {
+      fprintf(stderr, "avformat_write_header()\n");
+      exit(1);
+  }
 
-    // decode packet to frame
-    int got_frame = 0;
-    if (avcodec_decode_audio4(decode_struct.codec_ctx, frame, &got_frame, &packet) < 0) {
-        fprintf(stderr, "error: avcodec_decode_audio4()\n");
-        exit(1);
-    }
+  for (;;) {
+      memset(buffer, 0, play_struct.max_buffer_size);
 
-    if (!got_frame) {
-        continue;
-    }
+      // read input buffer from stdin
+      ssize_t ret = read(STDIN_FILENO, buffer, play_struct.max_buffer_size);
+      if (ret < 0) {
+          fprintf(stderr, "read(stdin)\n");
+          exit(1);
+      }
 
-    // convert input frame to output buffer
-    int got_samples = swr_convert(
-        decode_struct.swr_ctx,
-        &buffer, out_samples,
-        (const uint8_t **)frame->data, frame->nb_samples);
+      if (ret == 0) {
+          break;
+      }
 
-    if (got_samples < 0) {
-        fprintf(stderr, "error: swr_convert()\n");
-        exit(1);
-    }
+      reverb.get_samples(buffer, play_struct.max_buffer_size);
 
-    while (got_samples > 0) {
-        int buffer_size =
-            av_samples_get_buffer_size(
-                NULL, out_channels, got_samples, AV_SAMPLE_FMT_FLT, 1);
+      // create output packet
+      AVPacket packet;
+      av_init_packet(&packet);
+      packet.data = buffer;
+      packet.size = play_struct.max_buffer_size;
 
-        assert(buffer_size <= decode_struct.max_buffer_size);
-
-        // write output buffer to stdout
-        //if (write(STDOUT_FILENO, buffer, buffer_size) != buffer_size) {
-        //    fprintf(stderr, "error: write(stdout)\n");
-        //    exit(1);
-        //}
-
-        // process samples buffered inside swr context
-        got_samples = swr_convert(decode_struct.swr_ctx, &buffer, out_samples, NULL, 0);
-        if (got_samples < 0) {
-            fprintf(stderr, "error: swr_convert()\n");
-            exit(1);
-        }
-
-        // create output packet
-        AVPacket outPacket;
-        av_init_packet(&outPacket);
-        packet.data = buffer;
-        packet.size = buffer_size;
-
-        // write output packet to format context
-        if (av_write_frame(play_struct.fmt_ctx, &outPacket) < 0) {
-            fprintf(stderr, "av_write_frame()\n");
-            exit(1);
-        }
-    }
-
-    // free packet created by decoder
-    av_free_packet(&packet);
+      // write output packet to format context
+      if (av_write_frame(play_struct.fmt_ctx, &packet) < 0) {
+          fprintf(stderr, "av_write_frame()\n");
+          exit(1);
+      }
   }
 
   av_free(buffer);
-  av_frame_free(&frame);
+  deinit_ffmpeg_play(play_struct);
 
   return 0;
 }
-
-
-/* Read decoded audio samples from stdin and send them to ALSA using ffmpeg.
- * Input format:
- *  - two channels (front left, front right)
- *  - samples in interleaved format (L R L R ...)
- *  - samples are little-endian 32-bit floats
- *  - sample rate is 44100
- *
- * Usage:
- *   ./ffmpeg_play < cool_song_samples
- */
-
-/*
-
-int main(int argc, char** argv) {
-    if (argc != 1) {
-        fprintf(stderr, "usage: %s < input_file\n", argv[0]);
-        exit(1);
-    }
-
-    for (;;) {
-        memset(buffer, 0, max_buffer_size);
-
-        // read input buffer from stdin
-        ssize_t ret = read(STDIN_FILENO, buffer, max_buffer_size);
-        if (ret < 0) {
-            fprintf(stderr, "read(stdin)\n");
-            exit(1);
-        }
-
-        if (ret == 0) {
-            break;
-        }
-
-        // create output packet
-        AVPacket packet;
-        av_init_packet(&packet);
-        packet.data = buffer;
-        packet.size = max_buffer_size;
-
-        // write output packet to format context
-        if (av_write_frame(fmt_ctx, &packet) < 0) {
-            fprintf(stderr, "av_write_frame()\n");
-            exit(1);
-        }
-    }
-
-    av_free(buffer);
-
-    return 0;
-}
-*/
