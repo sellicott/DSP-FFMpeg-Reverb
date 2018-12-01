@@ -5,6 +5,7 @@
 #include <memory>
 #include <deque>
 #include "AllpassFilter.h"
+#include "FIRFilter.h"
 #include "CombFilter.h"
 
 using std::size_t;
@@ -30,6 +31,8 @@ private:
   AllpassFilter filter3;
   AllpassFilter filter4;
   AllpassFilter filter5;
+  FIRFilter firFilter1;
+  FIRFilter firFilter2;
   CombFilter comb1;
   CombFilter comb2;
   CombFilter comb3;

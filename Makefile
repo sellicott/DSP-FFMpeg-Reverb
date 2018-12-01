@@ -20,8 +20,8 @@ ffmpeg_play: ffmpeg_play.cpp Makefile
 ffmpeg_play_encoder: ffmpeg_play_encoder.cpp Makefile
 	g++ -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavdevice -lavutil
 
-ffmpeg_reverb: ffmpeg_reverb.cpp ReverbUnit.cpp AllpassFilter.cpp CombFilter.cpp Makefile
-	g++ -ggdb -o $@ $@.cpp ReverbUnit.cpp AllpassFilter.cpp CombFilter.cpp -lavformat -lavcodec -lavdevice -lavutil -lswresample
+ffmpeg_reverb: ffmpeg_reverb.cpp ReverbUnit.cpp AllpassFilter.cpp CombFilter.cpp FIRFilter.cpp Makefile
+	g++ -ggdb -o $@ $@.cpp ReverbUnit.cpp AllpassFilter.cpp CombFilter.cpp FIRFilter.cpp -lavformat -lavcodec -lavdevice -lavutil -lswresample
 
 #decode_audio: decode_audio.cpp Makefile
 #	gcc -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavutil -lswresample
