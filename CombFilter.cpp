@@ -2,7 +2,7 @@
 
 CombFilter::CombFilter(size_t delay_, float gain_) {
 
-  delay = delay_;
+  delay = delay_ * 2;
   gain = gain_;
   //make the buffer able to store 1 second of audio
   input_samples = std::make_unique<std::deque<double>>(delay, 0.0);

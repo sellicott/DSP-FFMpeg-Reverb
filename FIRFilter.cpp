@@ -4,7 +4,7 @@ FIRFilter::FIRFilter(std::vector<float> taps_) :
   taps(taps_)
 {
 
-  delay = taps_.size();
+  delay = taps_.size()*2;
   //make the buffer able to store 1 second of audio
   input_samples = std::make_unique<std::deque<double>>(delay, 0.0);
   output_samples = std::make_unique<std::deque<double>>(delay, 0.0);
@@ -20,8 +20,9 @@ double FIRFilter::do_filtering(double new_x) {
 
   double new_val = 0;
   // implement the filter. 
-  for (auto i = 0; i < delay; ++i) {
-    new_val += taps[i]*x[i];
+  for (auto i = 0; i < delay/2; ++i) {
+    //multiply by 2 to account for LR channels
+    new_val += taps[i]*x[2*i];
   }
 
   // get rid of the oldest value for y

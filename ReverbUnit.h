@@ -33,10 +33,7 @@ private:
   AllpassFilter filter5;
   FIRFilter firFilter1;
   FIRFilter firFilter2;
-  CombFilter comb1;
-  CombFilter comb2;
-  CombFilter comb3;
-  CombFilter comb4;
+  FIRFilter firFilter3;
   buffPtr delay1;
   buffPtr delay2;
   buffPtr delay3;
