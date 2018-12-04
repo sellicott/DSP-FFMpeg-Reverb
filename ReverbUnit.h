@@ -15,7 +15,7 @@ using std::array;
 
 
 class ReverbUnit {
-using outType = float;
+using outType = int32_t;
 using deque = std::deque<outType>;
 using buffPtr = std::unique_ptr<deque>;
 
@@ -32,10 +32,7 @@ private:
   AllpassFilter filter2;
   AllpassFilter filter3;
   AllpassFilter filter4;
-  AllpassFilter filter5;
-  FIRFilter firFilter1;
-  FIRFilter firFilter2;
-  FIRFilter firFilter3;
+  FIRFilter firFilter;
   buffPtr delay;
   outType do_filtering(outType new_x);
 

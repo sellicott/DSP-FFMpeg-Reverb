@@ -9,9 +9,8 @@ ReverbUnit::ReverbUnit(size_t outbuff_size_) :
   filter2(1470, -0.6), 
   filter3(490, 0.6),
   filter4(163, -0.6),
-  filter5(54, 0.6),
 
-  firFilter1({ 0.003369,0.002810,0.001758,0.000340,-0.001255,-0.002793,-0.004014,
+  firFilter({ 0.003369,0.002810,0.001758,0.000340,-0.001255,-0.002793,-0.004014,
     -0.004659,-0.004516,-0.003464,-0.001514,0.001148,0.004157,0.006986,0.009003,
     0.009571,0.008173,0.004560,-0.001120,-0.008222,-0.015581,-0.021579,-0.024323,
     -0.021933,-0.012904,0.003500,0.026890,0.055537,0.086377,0.115331,0.137960,
@@ -19,16 +18,7 @@ ReverbUnit::ReverbUnit(size_t outbuff_size_) :
     -0.012904,-0.021933,-0.024323,-0.021579,-0.015581,-0.008222,-0.001120,
     0.004560,0.008173,0.009571,0.009003,0.006986,0.004157,0.001148,-0.001514,
     -0.003464,-0.004516,-0.004659,-0.004014,-0.002793,-0.001255,0.000340,
-    0.001758,0.002810,0.003369 }),
-
-  firFilter2({ -0.029352,-0.026647,-0.020740,-0.010829,0.003836,0.023530,0.047656,
-    0.074492,0.101210,0.124222,0.139892,0.145460,0.139892,0.124222,0.101210,
-    0.074492,0.047656,0.023530,0.003836,-0.010829,-0.020740,-0.026647,-0.029352 }),
-
-  firFilter3({ 0.016054,0.011635,0.003607,-0.006493,-0.016564,-0.024185,-0.026940,
-    -0.022788,-0.010466,0.010148,0.037786,0.069719,0.101973,0.129864,0.148852,
-    0.155594,0.148852,0.129864,0.101973,0.069719,0.037786,0.010148,-0.010466,
-    -0.022788,-0.026940,-0.024185,-0.016564,-0.006493,0.003607,0.011635,0.016054 })
+    0.001758,0.002810,0.003369 })
 {
   outbuff_size = outbuff_size_;
   delay = std::make_unique<deque>(3*2*2940, 0.0);
@@ -58,25 +48,21 @@ uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
 ReverbUnit::outType ReverbUnit::do_filtering(outType new_x) {
   auto &d = *delay.get();
 
-
-  //auto x = 0.7*new_x;
+  // the coefficient on the d.back() sets how long the reverb 
+  // will sustain: larger = longer 
   auto x = 0.7*new_x + 0.25*d.back();
 
-  auto flt1 = firFilter2.do_filtering(x);
   //run through the all pass filters
-  auto temp1 = filter1.do_filtering(flt1);
-  auto temp2 = filter2.do_filtering(temp1);
-  auto temp3 = filter3.do_filtering(temp2);
-  auto flt2 = firFilter3.do_filtering(temp3);
-  auto temp4 = filter4.do_filtering(flt2);
-  //auto temp5 = filter5.do_filtering(temp4);
-
-  auto y = firFilter1.do_filtering(temp4);
+  auto temp = filter1.do_filtering(x);
+  temp = filter2.do_filtering(temp);
+  temp = filter3.do_filtering(temp);
+  temp = filter4.do_filtering(temp);
+  temp = firFilter.do_filtering(temp);
 
   d.pop_back();
-  d.push_front(y);
+  d.push_front(temp);
 
-  auto temp6 = y + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*d.back();
-  //auto temp7 = firFilter2.do_filtering(temp6);
-  return temp6;
+  //add a bit of an FIR filter here, smooth the output
+  auto y = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*d.back();
+  return y;
 }

@@ -7,12 +7,13 @@
 #include <vector>
 
 using std::size_t;
+using std::int32_t;
 
 using std::array;
 
 
 class FIRFilter {
-using outType = float;
+using outType = int32_t;
 using deque = std::deque<outType>;
 using buffPtr = std::unique_ptr<deque>;
 
