@@ -12,13 +12,15 @@ using std::array;
 
 
 class FIRFilter {
-using buffPtr = std::unique_ptr<std::deque<double>>;
+using outType = float;
+using deque = std::deque<outType>;
+using buffPtr = std::unique_ptr<deque>;
 
 public:
   FIRFilter(std::vector<float> taps_);
   ~FIRFilter() = default;
 
-  double do_filtering(double new_x);
+  outType do_filtering(outType new_x);
 
 private:
 
@@ -26,7 +28,6 @@ private:
   size_t delay;
   std::vector<float> taps;
   buffPtr input_samples;
-  buffPtr output_samples;
 };
 
 #endif // _REVERB_UNIT_H_

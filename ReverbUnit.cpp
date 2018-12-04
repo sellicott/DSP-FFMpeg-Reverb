@@ -5,11 +5,6 @@
 
 ReverbUnit::ReverbUnit(size_t outbuff_size_) : 
   reverb_gain(0.6),
-  //filter1(3920, reverb_gain), 
-  //filter2(327, -reverb_gain), 
-  //filter3(109, reverb_gain),
-  //filter4(37, -reverb_gain),
-  //filter5(18, reverb_gain),
   filter1(4410, 0.6), 
   filter2(1470, -0.6), 
   filter3(490, 0.6),
@@ -36,9 +31,7 @@ ReverbUnit::ReverbUnit(size_t outbuff_size_) :
     -0.022788,-0.026940,-0.024185,-0.016564,-0.006493,0.003607,0.011635,0.016054 })
 {
   outbuff_size = outbuff_size_;
-  delay1 = std::make_unique<std::deque<double>>(2*2940, 0.0);
-  delay2 = std::make_unique<std::deque<double>>(2*2940, 0.0);
-  delay3 = std::make_unique<std::deque<double>>(2*2940, 0.0);
+  delay = std::make_unique<deque>(3*2*2940, 0.0);
 }
 
 uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
@@ -62,14 +55,12 @@ uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
   return reinterpret_cast<uint8_t*>(samples);  
 }
 
-double ReverbUnit::do_filtering(double new_x) {
-  auto &d1 = *delay1.get();
-  auto &d2 = *delay2.get();
-  auto &d3 = *delay3.get();
+ReverbUnit::outType ReverbUnit::do_filtering(outType new_x) {
+  auto &d = *delay.get();
 
 
-  auto x = 0.7*new_x;
-  //auto x = 0.7*new_x + d3.back();
+  //auto x = 0.7*new_x;
+  auto x = 0.7*new_x + 0.25*d.back();
 
   auto flt1 = firFilter2.do_filtering(x);
   //run through the all pass filters
@@ -82,16 +73,10 @@ double ReverbUnit::do_filtering(double new_x) {
 
   auto y = firFilter1.do_filtering(temp4);
 
+  d.pop_back();
+  d.push_front(y);
 
-  d3.pop_back();
-  d3.push_front(d2.back());
-  d2.pop_back();
-  d2.push_front(d1.back());
-  d1.pop_back();
-  d1.push_front(y);
-
-
-  auto temp6 = y + 0.5*d1.back() + 0.25*d2.back() + 0.125*d3.back();
+  auto temp6 = y + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*d.back();
   //auto temp7 = firFilter2.do_filtering(temp6);
   return temp6;
 }

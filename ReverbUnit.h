@@ -15,7 +15,9 @@ using std::array;
 
 
 class ReverbUnit {
-using buffPtr = std::unique_ptr<std::deque<double>>;
+using outType = float;
+using deque = std::deque<outType>;
+using buffPtr = std::unique_ptr<deque>;
 
 public:
   ReverbUnit(size_t outbuff_size_ = 512);
@@ -34,10 +36,8 @@ private:
   FIRFilter firFilter1;
   FIRFilter firFilter2;
   FIRFilter firFilter3;
-  buffPtr delay1;
-  buffPtr delay2;
-  buffPtr delay3;
-  double do_filtering(double new_x);
+  buffPtr delay;
+  outType do_filtering(outType new_x);
 
   const size_t sample_rate = 44100;
   size_t outbuff_size;
