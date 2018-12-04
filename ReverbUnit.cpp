@@ -35,7 +35,6 @@ uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
     auto left_sample = samples_cast[i];
     auto filtered = reverb_gain*do_filtering(left_sample);
     samples_cast[i] = filtered + left_sample;
-    //std::cout << left_sample << ' ' << filtered << '\n' ;
     ++i;
     auto right_sample = samples_cast[i];
     filtered = reverb_gain*do_filtering(right_sample);

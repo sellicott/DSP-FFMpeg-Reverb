@@ -25,7 +25,6 @@ public:
 
 private:
 
-  // multiply by 2 to make room for the L/R audio channels
   size_t delay;
   std::vector<float> taps;
   buffPtr input_samples;

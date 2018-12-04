@@ -3,9 +3,10 @@
 FIRFilter::FIRFilter(std::vector<float> taps_) :
   taps(taps_)
 {
-
+  // multiply by 2 to make room for the L/R audio channels
   delay = taps_.size()*2;
-  //make the buffer able to store 1 second of audio
+
+  // initilize buffer to zeros
   input_samples = std::make_unique<deque>(delay, 0.0);
 }
 

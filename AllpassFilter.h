@@ -23,8 +23,6 @@ public:
   outType do_filtering(outType new_x);
 
 private:
-
-  // multiply by 2 to make room for the L/R audio channels
   size_t delay;
   float gain;
   buffPtr delay_buff;
