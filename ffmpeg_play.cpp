@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 
     const int max_buffer_size =
         av_samples_get_buffer_size(
-            NULL, in_channels, in_samples, AV_SAMPLE_FMT_FLT, 1);
+            NULL, in_channels, in_samples, AV_SAMPLE_FMT_S16, 1);
 
     // register supported formats and codecs
     av_register_all();
@@ -67,9 +67,9 @@ int main(int argc, char** argv) {
     // format conetxt uses codec context when writing packets
     AVCodecContext* codec_ctx = stream->codec;
     assert(codec_ctx);
-    codec_ctx->codec_id = AV_CODEC_ID_PCM_F32LE;
+    codec_ctx->codec_id = AV_CODEC_ID_PCM_S16LE;
     codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-    codec_ctx->sample_fmt = AV_SAMPLE_FMT_FLT;
+    codec_ctx->sample_fmt = AV_SAMPLE_FMT_S16;
     codec_ctx->bit_rate = bitrate;
     codec_ctx->sample_rate = sample_rate;
     codec_ctx->channels = in_channels;

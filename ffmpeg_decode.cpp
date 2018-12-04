@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 
     const int max_buffer_size =
         av_samples_get_buffer_size(
-            NULL, out_channels, out_samples, AV_SAMPLE_FMT_FLT, 1);
+            NULL, out_channels, out_samples, AV_SAMPLE_FMT_S16, 1);
 
     // register supported formats and codecs
     av_register_all();
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     SwrContext* swr_ctx =
         swr_alloc_set_opts(NULL,
                            AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT, // output
-                           AV_SAMPLE_FMT_FLT,                    // output
+                           AV_SAMPLE_FMT_S16,                    // output
                            sample_rate,                          // output
                            codec_ctx->channel_layout,  // input
                            codec_ctx->sample_fmt,      // input
@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
         while (got_samples > 0) {
             int buffer_size =
                 av_samples_get_buffer_size(
-                    NULL, out_channels, got_samples, AV_SAMPLE_FMT_FLT, 1);
+                    NULL, out_channels, got_samples, AV_SAMPLE_FMT_S16, 1);
 
             assert(buffer_size <= max_buffer_size);
 

@@ -10,11 +10,11 @@ ReverbUnit::ReverbUnit(size_t outbuff_size_) :
   //filter3(109, reverb_gain),
   //filter4(37, -reverb_gain),
   //filter5(18, reverb_gain),
-  filter1(4410, reverb_gain), 
-  filter2(1470, -reverb_gain), 
-  filter3(490, reverb_gain),
-  filter4(163, -reverb_gain),
-  filter5(54, reverb_gain),
+  filter1(4410, 0.6), 
+  filter2(1470, -0.6), 
+  filter3(490, 0.6),
+  filter4(163, -0.6),
+  filter5(54, 0.6),
 
   firFilter1({ 0.003369,0.002810,0.001758,0.000340,-0.001255,-0.002793,-0.004014,
     -0.004659,-0.004516,-0.003464,-0.001514,0.001148,0.004157,0.006986,0.009003,
@@ -44,28 +44,28 @@ ReverbUnit::ReverbUnit(size_t outbuff_size_) :
 uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
 
   //convert the uint8_t samples to floating point
-  auto float_samples = reinterpret_cast<float*>(samples);
-  auto num_float_samples = num_samples/sizeof(float);
+  auto samples_cast = reinterpret_cast<int16_t*>(samples);
+  auto num_samples_cast = num_samples/sizeof(int16_t);
 
-  for (auto i = 0; i < num_float_samples; i++) {
+  for (auto i = 0; i < num_samples_cast; i++) {
     //filters on!
-    auto left_sample = float_samples[i];
-    float_samples[i] = 0.5*do_filtering(left_sample) + left_sample;
-    //std::cout << left_sample << ' ' << float_samples[i] << '\n' ;
+    auto left_sample = samples_cast[i];
+    auto filtered = reverb_gain*do_filtering(left_sample);
+    samples_cast[i] = filtered + left_sample;
+    //std::cout << left_sample << ' ' << filtered << '\n' ;
     ++i;
-    auto right_sample = float_samples[i];
-    float_samples[i] = 0.5*do_filtering(right_sample) + right_sample;
+    auto right_sample = samples_cast[i];
+    filtered = reverb_gain*do_filtering(right_sample);
+    samples_cast[i] = filtered + right_sample;
   }
 
   return reinterpret_cast<uint8_t*>(samples);  
 }
 
 double ReverbUnit::do_filtering(double new_x) {
-/* 
   auto &d1 = *delay1.get();
   auto &d2 = *delay2.get();
   auto &d3 = *delay3.get();
-  */
 
 
   auto x = 0.7*new_x;
@@ -83,20 +83,15 @@ double ReverbUnit::do_filtering(double new_x) {
   auto y = firFilter1.do_filtering(temp4);
 
 
-/*
   d3.pop_back();
   d3.push_front(d2.back());
   d2.pop_back();
   d2.push_front(d1.back());
   d1.pop_back();
   d1.push_front(y);
-*/  
 
 
-  //auto temp6 = temp5 + 0.5*d1.back() + 0.25*d2.back() + 0.125*d3.back();
+  auto temp6 = y + 0.5*d1.back() + 0.25*d2.back() + 0.125*d3.back();
   //auto temp7 = firFilter2.do_filtering(temp6);
-
-  if (y > 1.0) y = 1.0;
-  else if( y < -1.0 ) y = -1.0;
-  return y;
+  return temp6;
 }

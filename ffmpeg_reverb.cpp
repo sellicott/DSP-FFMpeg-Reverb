@@ -121,7 +121,7 @@ ffmpeg_decode_init_t init_ffmpeg_decoder(string filename, int out_samples, int s
   init_struct.swr_ctx  =
       swr_alloc_set_opts(NULL,
                           AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT, // output
-                          AV_SAMPLE_FMT_FLT,                    // output
+                          AV_SAMPLE_FMT_S16,                    // output
                           sample_rate,                          // output
                           init_struct.codec_ctx->channel_layout,  // input
                           init_struct.codec_ctx->sample_fmt,      // input
@@ -143,7 +143,7 @@ ffmpeg_play_init_t init_ffmpeg_play(int in_channels, int in_samples, int sample_
 
   init_struct.max_buffer_size =
       av_samples_get_buffer_size(
-          NULL, in_channels, in_samples, AV_SAMPLE_FMT_FLT, 1);
+          NULL, in_channels, in_samples, AV_SAMPLE_FMT_S16, 1);
 
   AVOutputFormat* fmt = av_guess_format("alsa", NULL, NULL);
   if (!fmt) {
@@ -173,9 +173,9 @@ ffmpeg_play_init_t init_ffmpeg_play(int in_channels, int in_samples, int sample_
   // format conetxt uses codec context when writing packets
   init_struct.codec_ctx = init_struct.stream->codec;
   assert(init_struct.codec_ctx);
-  init_struct.codec_ctx->codec_id = AV_CODEC_ID_PCM_F32LE;
+  init_struct.codec_ctx->codec_id = AV_CODEC_ID_PCM_S16LE;
   init_struct.codec_ctx->codec_type = AVMEDIA_TYPE_AUDIO;
-  init_struct.codec_ctx->sample_fmt = AV_SAMPLE_FMT_FLT;
+  init_struct.codec_ctx->sample_fmt = AV_SAMPLE_FMT_S16;
   init_struct.codec_ctx->bit_rate = bitrate;
   init_struct.codec_ctx->sample_rate = sample_rate;
   init_struct.codec_ctx->channels = in_channels;
@@ -248,6 +248,7 @@ int main(int argc, char** argv) {
       // create output packet
       AVPacket packet;
       av_init_packet(&packet);
+      //packet.data = buffer;
       packet.data = reverb.get_samples(buffer, play_struct.max_buffer_size);
       packet.size = play_struct.max_buffer_size;
 
