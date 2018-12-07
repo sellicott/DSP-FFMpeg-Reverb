@@ -8,7 +8,7 @@
  *   ./ffmpeg_decode cool_song.mp3 | ./filter | ./ffmpeg_play 
  */
 
-#include "ReverbUnit.h"
+#include "FilterProject.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -24,13 +24,15 @@ using std::uint8_t;
 using std::int16_t;
 
 
-ReverbUnit::ReverbUnit() : 
+ReverbUnit::ReverbUnit(float feedbackGain_) : 
   reverb_gain(0.6),
-  filter1(4410, 0.6), 
-  filter2(1470, -0.6), 
-  filter3(490, 0.6),
-  filter4(163, -0.6),
+  //initilize filters
+  allpass1(4410, 0.6), 
+  allpass2(1470, -0.6), 
+  allpass3(490, 0.6),
+  allpass4(163, -0.6),
 
+  // pass in FIR coefficients to the FIR filter class
   firFilter({ 0.003369,0.002810,0.001758,0.000340,-0.001255,-0.002793,-0.004014,
     -0.004659,-0.004516,-0.003464,-0.001514,0.001148,0.004157,0.006986,0.009003,
     0.009571,0.008173,0.004560,-0.001120,-0.008222,-0.015581,-0.021579,-0.024323,
@@ -42,6 +44,11 @@ ReverbUnit::ReverbUnit() :
     0.001758,0.002810,0.003369 })
 {
   delay = std::make_unique<deque>(3*2*2940, 0.0);
+
+  feedbackGain = 0.25;
+  if (feedbackGain_ > 0 && feedbackGain_ < 1) {
+    feedbackGain = feedbackGain_;
+  }
 }
 
 // function to run on the samples from stdin
@@ -70,13 +77,13 @@ ReverbUnit::outType ReverbUnit::do_filtering(outType new_x) {
 
   // the coefficient on the d.back() sets how long the reverb 
   // will sustain: larger = longer 
-  auto x = 0.7*new_x + 0.25*d.back();
+  auto x = 0.7*new_x + feedbackGain*d.back();
 
   //run through the all pass filters
-  auto temp = filter1.do_filtering(x);
-  temp = filter2.do_filtering(temp);
-  temp = filter3.do_filtering(temp);
-  temp = filter4.do_filtering(temp);
+  auto temp = allpass1.do_filtering(x);
+  temp = allpass2.do_filtering(temp);
+  temp = allpass3.do_filtering(temp);
+  temp = allpass4.do_filtering(temp);
   temp = firFilter.do_filtering(temp);
 
   d.pop_back();
@@ -98,7 +105,7 @@ int main(int argc, char** argv) {
   //some constants
   const int BUFF_SIZE = 4096;
   array<uint8_t, BUFF_SIZE> buffer;
-  ReverbUnit reverb;
+  ReverbUnit reverb(0.25);
 
   for (;;) {
 
