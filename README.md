@@ -21,6 +21,11 @@ playback program takes the samples and does magic on them so the linux audio sys
 it back.
 
 One gotcha is that since the files are typically stereo left and right samples are interleaved.
+this means that each buffer should be twice as long as designed, then every other index is used.
+For example to implement a 2nd order filter a buffer with a length of 6 is needed then indexes
+0, 2,and 4 will be used.
+
+The filter should be implemented in the do_filtering() function.
 
 Decoded samples are always in the same format:
 * linear PCM;
@@ -29,7 +34,7 @@ Decoded samples are always in the same format:
 * samples are 16-bits sighed integers in little endian (actually CPU should be little-endian too);
 * sample rate is 44100 Hz.
 
-
+Note that the raspberry pi works much better if the GUI has been turned off (just google it).
 ### Building
 
 On the pi some packages need to be installed (this is the audio decoding library).
