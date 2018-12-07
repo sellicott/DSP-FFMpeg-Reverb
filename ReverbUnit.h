@@ -20,7 +20,7 @@ using deque = std::deque<outType>;
 using buffPtr = std::unique_ptr<deque>;
 
 public:
-  ReverbUnit(size_t outbuff_size_ = 512);
+  ReverbUnit();
   ~ReverbUnit() = default;
 
   uint8_t* get_samples(uint8_t* samples, size_t num_samples);
@@ -37,7 +37,6 @@ private:
   outType do_filtering(outType new_x);
 
   const size_t sample_rate = 44100;
-  size_t outbuff_size;
 };
 
 #endif //_REVERB_UNIT_H_

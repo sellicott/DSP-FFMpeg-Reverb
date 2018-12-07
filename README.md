@@ -1,3 +1,6 @@
+# DPS Filters project repo
+This project is heavily based on the work of github user gavv. 
+His github repo is [here](https://github.com/gavv/snippets/tree/master/decode_play)
 # Decoding and playing audio file in Linux
 
 See details in the [blog post](https://gavv.github.io/blog/decode-play/).

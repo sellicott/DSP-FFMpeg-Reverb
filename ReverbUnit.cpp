@@ -1,9 +1,30 @@
+/* Perform filtering on audio samples 
+ * - reads input from stdin and writes filtered samples to stdout
+ * - two channels (front left, front right)
+ * - samples in interleaved format (L R L R ...)
+ * - samples are 16-bit signed integers (what the Rpi needs)
+ *
+ * Usage:
+ *   ./ffmpeg_decode cool_song.mp3 | ./filter | ./ffmpeg_play 
+ */
+
 #include "ReverbUnit.h"
 
 #include <iostream>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string>
+#include <memory>
+
+using std::string;
+using std::array;
+using std::uint8_t;
+using std::int16_t;
 
 
-ReverbUnit::ReverbUnit(size_t outbuff_size_) : 
+ReverbUnit::ReverbUnit() : 
   reverb_gain(0.6),
   filter1(4410, 0.6), 
   filter2(1470, -0.6), 
@@ -20,10 +41,10 @@ ReverbUnit::ReverbUnit(size_t outbuff_size_) :
     -0.003464,-0.004516,-0.004659,-0.004014,-0.002793,-0.001255,0.000340,
     0.001758,0.002810,0.003369 })
 {
-  outbuff_size = outbuff_size_;
   delay = std::make_unique<deque>(3*2*2940, 0.0);
 }
 
+// function to run on the samples from stdin
 uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
 
   //convert the uint8_t samples to floating point
@@ -64,4 +85,44 @@ ReverbUnit::outType ReverbUnit::do_filtering(outType new_x) {
   //add a bit of an FIR filter here, smooth the output
   auto y = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*d.back();
   return y;
+}
+
+
+// ---------------------------------------------main --------------------------------------------------
+int main(int argc, char** argv) {
+  if (argc != 1) {
+      fprintf(stderr, "usage: ./ffmpeg_decode <input file> | %s | ./ffmpeg_play\n", argv[0]);
+      exit(1);
+  }
+
+  //some constants
+  const int BUFF_SIZE = 4096;
+  array<uint8_t, BUFF_SIZE> buffer;
+  ReverbUnit reverb;
+
+  for (;;) {
+
+    // read input buffer from stdin
+    ssize_t ret = read(STDIN_FILENO, buffer.data(), buffer.size());
+    if (ret < 0) {
+        fprintf(stderr, "read(stdin)\n");
+        exit(1);
+    }
+
+    //exit if out of data
+    if (ret == 0) {
+        break;
+    }
+
+    // do the filtering
+    reverb.get_samples(buffer.data(), buffer.size());
+
+    // write output buffer to stdout
+    if (write(STDOUT_FILENO, buffer.data(), buffer.size()) != buffer.size()) {
+      fprintf(stderr, "error: write(stdout)\n");
+      exit(1);
+    }
+  }
+
+  return 0;
 }
