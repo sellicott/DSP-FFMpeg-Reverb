@@ -74,7 +74,6 @@ Steps to filtering goodness
   cd DSP-FFMpeg-Reverb
   make
   ```
-
   This will (hopefully) build all of the code needed to run your project.
 
 6. Now you need some great music 
@@ -93,3 +92,7 @@ Steps to filtering goodness
   ./ffmpeg_decode your_snazzy_audio_file.mp3 | ./ffmpeg_filter | ./ffmpeg_play 
   ```
   Note that the input audio file can be in almost any format.
+
+# Implementing Filters
+In the FilterProject.cpp file the function do_filtering implements the filters for the project.
+(The main file calls another function get_samples() which calls )
