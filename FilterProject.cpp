@@ -23,9 +23,8 @@ using std::array;
 using std::uint8_t;
 using std::int16_t;
 
-
-ReverbUnit::ReverbUnit(float feedbackGain_) : 
-  reverb_gain(0.6),
+// Constructor implementation
+FilterProject::FilterProject(float feedbackGain_) : 
   //initilize filters
   allpass1(4410, 0.6), 
   allpass2(1470, -0.6), 
@@ -72,25 +71,26 @@ uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
   return reinterpret_cast<uint8_t*>(samples);  
 }
 
-ReverbUnit::outType ReverbUnit::do_filtering(outType new_x) {
+FilterProject::outType FilterProject::do_filtering(outType new_x) {
   auto &d = *delay.get();
 
   // the coefficient on the d.back() sets how long the reverb 
   // will sustain: larger = longer 
   auto x = 0.7*new_x + feedbackGain*d.back();
 
-  //run through the all pass filters
-  auto temp = allpass1.do_filtering(x);
-  temp = allpass2.do_filtering(temp);
-  temp = allpass3.do_filtering(temp);
-  temp = allpass4.do_filtering(temp);
-  temp = firFilter.do_filtering(temp);
+  // run through the all pass filters
+  // chain the outputs end to end
+  auto y1 = allpass1.do_filtering(x);
+  auto y2 = allpass2.do_filtering(y1);
+  auto y3 = allpass3.do_filtering(y2);
+  auto y4 = allpass4.do_filtering(y3);
+  auto y5 = firFilter.do_filtering(y4);
 
   d.pop_back();
   d.push_front(temp);
 
   //add a bit of an FIR filter here, smooth the output
-  auto y = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*d.back();
+  auto y = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*[3*2*2940];
   return y;
 }
 

@@ -14,20 +14,20 @@ using std::array;
 
 
 class ReverbUnit {
-using outType = int32_t;
-using deque = std::deque<outType>;
-using buffPtr = std::unique_ptr<deque>;
+private:
+  using outType = int16_t;
+  using deque = std::deque<outType>;
+  using buffPtr = std::unique_ptr<deque>;
 
 public:
-  ReverbUnit(float feedbackGain_ = 0.25);
-  ~ReverbUnit() = default;
+  //constructor
+  FilterProject(float feedbackGain_ = 0.25);
 
   // the decoder and playback programs need the take the samples in the form of 8-bit integers
   uint8_t* get_samples(uint8_t* samples, size_t num_samples);
 
 private:
-
-  float reverb_gain;
+  //define the names of the filters I will be using
   AllpassFilter allpass1;
   AllpassFilter allpass2;
   AllpassFilter allpass3;

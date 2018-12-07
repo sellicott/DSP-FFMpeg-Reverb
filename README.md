@@ -45,6 +45,7 @@ is meant to be typed into a terminal (command line) on the pi. Remember that pre
 
 To get the project working start with a raspberry pi with a bootable sd card. 
 The pi should be running, logged in, with a keyboard and screen plugged connected, **and connected to the internet**.
+You probably should also disable the pi's GUI, as it isn't necessary, and will just bog down the pi.
 
 Steps to filtering goodness
 1. Change the keyboard layout (it defaults to a UK layout)
@@ -76,9 +77,12 @@ Steps to filtering goodness
   ```
   This will (hopefully) build all of the code needed to run your project.
 
-6. Now you need some great music 
-  Put your files on a flash drive, the connect the drive to the pi. Next copy the files
-  into the directory with the code. Your flash drive will be in the /media/pi/name_of_your_drive.
+6. Now you need some great music: 
+
+  Put your files on a flash drive and connect the drive to the pi. Next, copy the files
+  into the project directory.
+  
+  Your flash drive will be in the /media/pi/name_of_your_drive folder on the pi.
   Assuming that your file is on the root directory of your flash drive:
   ``` 
   cp /media/pi/name_of_drive your_snazzy_audio_file.mp3 ./ 
@@ -93,6 +97,19 @@ Steps to filtering goodness
   ```
   Note that the input audio file can be in almost any format.
 
-# Implementing Filters
+# The Code
 In the FilterProject.cpp file the function do_filtering implements the filters for the project.
-(The main file calls another function get_samples() which calls )
+(The main file calls another function get_samples() which calls do_filtering() in order to apply the filter to the buffer
+provided by the audio decoder program.) 
+
+In my project I used this function to chain togeter all of the other filters I used 
+(four allpass filters and a few FIR filters). These filters are implemented as c++ objects, meaining they need to be instantiated 
+(they are defined near the end of FilterProject.h). I do this in the *base initilization section* 
+(right after the beginning of the constructor, you remember CS1220 don't you?) of the FilterProject class. 
+
+The actual filters for the project are implemented in the files 
+(AllpassFilter.cpp)[./AllpassFilter.cpp], (FIRFilter.cpp)[./FIRFilter.cpp] and their corresponding .h files (AllpassFilter.h)[./AllpassFilter.h]
+(FIRFilter.h)[./FIRFilter.h]. You can probably copy these files when implementing your own filters (or just use my FIR filter code as-is).
+
+## Implementing Filters
+
