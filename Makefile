@@ -1,10 +1,4 @@
-#snippets := \
-	ffmpeg_decode \
-	ffmpeg_play \
-	ffmpeg_play_encoder \
-	ffmpeg_reverb 
 snippets := ffmpeg_filter ffmpeg_decode ffmpeg_play
-#	decode_audio
 
 all: $(snippets)
 

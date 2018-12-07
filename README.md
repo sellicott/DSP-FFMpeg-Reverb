@@ -1,9 +1,9 @@
 # DPS Filters project repo
 This project is heavily based on the work of github user gavv. 
 His github repo is [here](https://github.com/gavv/snippets/tree/master/decode_play)
-See details in the [blog post](https://gavv.github.io/blog/decode-play/).
+see details in his [blog post](https://gavv.github.io/blog/decode-play/).
 
-### Overview
+# Overview
 
 This project implements a digital filter in the time domain in c++.
 This is accomplished by implementing the difference equation directly.
@@ -25,7 +25,7 @@ this means that each buffer should be twice as long as designed, then every othe
 For example to implement a 2nd order filter a buffer with a length of 6 is needed then indexes
 0, 2,and 4 will be used.
 
-The filter should be implemented in the do_filtering() function.
+**The filter should be implemented in the do_filtering() function.**
 
 Decoded samples are always in the same format:
 * linear PCM;
@@ -35,28 +35,61 @@ Decoded samples are always in the same format:
 * sample rate is 44100 Hz.
 
 Note that the raspberry pi works much better if the GUI has been turned off (just google it).
-### Building
+# Compiling the code 
 
-On the pi some packages need to be installed (this is the audio decoding library).
-Connect the pi to the internet (via ethernet) then run
+A note on format any font that looks
 ```
-sudo apt install libavcodec-dev libavformat-dev libavdevice-dev
+like this (aka has three tick marks before and after it)
 ```
+is meant to be typed into a terminal (command line) on the pi. Remember that pressing tab a few times auto-completes.
 
-Next get into this directory and run
-```
-make
-```
-This will (hopefully) build all of the code needed to run your project.
+To get the project working start with a raspberry pi with a bootable sd card. 
+The pi should be running, logged in, with a keyboard and screen plugged connected, **and connected to the internet**.
 
-### Usage
+Steps to filtering goodness
+1. Change the keyboard layout (it defaults to a UK layout)
+  Run the following command in the terminal to change the layout.
+  ```
+  sudo dpkg-reconfigure keyboard-configuration 
+  ```
 
-The decoder, filter, and playback programs must be connected via pipe.
-(A pipe takes the output from stdout from one program and "pipes" it into
-the input for another program.) To use your filter run the following command.
+2. Reboot the pi (this makes the changes take effect)
+  ``` 
+  sudo reboot 
+  ```
 
-```
-./ffmpeg_decode your_snazzy_audio_file.mp3 | ./ffmpeg_filter | ./ffmpeg_play
-```
+3. Get my code from git
+  ``` 
+  git clone https://github.com/sellicott/DSP-FFMpeg-Reverb.git 
+  ```
 
-Note that the input audio file can be in almost any format.
+4. Install the required packages (this is the audio decoding library)
+  ``` 
+  sudo apt install libavcodec-dev libavformat-dev libavdevice-dev 
+  ```
+  This installs the three listed packages from the raspbian software library.
+
+5. Next move into the directory and compile the code 
+  ```
+  cd DSP-FFMpeg-Reverb
+  make
+  ```
+
+  This will (hopefully) build all of the code needed to run your project.
+
+6. Now you need some great music 
+  Put your files on a flash drive, the connect the drive to the pi. Next copy the files
+  into the directory with the code. Your flash drive will be in the /media/pi/name_of_your_drive.
+  Assuming that your file is on the root directory of your flash drive:
+  ``` 
+  cp /media/pi/name_of_drive your_snazzy_audio_file.mp3 ./ 
+  ```
+
+7. Now you can run your filter
+  The decoder, filter, and playback programs must be connected via pipe.
+  (A pipe takes the output from stdout from one program and "pipes" it into
+  the input for another program.) To use your filter run the following command.
+  ``` 
+  ./ffmpeg_decode your_snazzy_audio_file.mp3 | ./ffmpeg_filter | ./ffmpeg_play 
+  ```
+  Note that the input audio file can be in almost any format.
