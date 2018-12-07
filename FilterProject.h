@@ -13,7 +13,7 @@ using std::int16_t;
 using std::array;
 
 
-class ReverbUnit {
+class FilterProject{
 private:
   using outType = int16_t;
   using deque = std::deque<outType>;

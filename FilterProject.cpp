@@ -60,12 +60,10 @@ uint8_t* FilterProject::get_samples(uint8_t* samples, size_t num_samples) {
   for (auto i = 0; i < num_samples_cast; i++) {
     //filters on!
     auto left_sample = samples_cast[i];
-    auto filtered = do_filtering(left_sample);
-    samples_cast[i] = filtered;
+    samples_cast[i] = do_filtering(left_sample);
     ++i;
     auto right_sample = samples_cast[i];
-    filtered = do_filtering(right_sample);
-    samples_cast[i] = filtered;
+    samples_cast[i] = do_filtering(right_sample);
   }
 
   return reinterpret_cast<uint8_t*>(samples);  
@@ -87,10 +85,10 @@ FilterProject::outType FilterProject::do_filtering(outType new_x) {
   auto y5 = firFilter.do_filtering(y4);
 
   d.pop_back();
-  d.push_front(temp);
+  d.push_front(y5);
 
   //add a bit of an FIR filter here, smooth the output
-  auto reverb_signal = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*[3*2*2940];
+  auto reverb_signal = y5 + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*d[3*2*2940];
   auto y = 0.6*reverb_signal + new_x;
   return y;
 }
