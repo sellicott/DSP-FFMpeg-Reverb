@@ -51,7 +51,7 @@ FilterProject::FilterProject(float feedbackGain_) :
 }
 
 // function to run on the samples from stdin
-uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
+uint8_t* FilterProject::get_samples(uint8_t* samples, size_t num_samples) {
 
   //convert the uint8_t samples to floating point
   auto samples_cast = reinterpret_cast<int16_t*>(samples);
@@ -60,12 +60,12 @@ uint8_t* ReverbUnit::get_samples(uint8_t* samples, size_t num_samples) {
   for (auto i = 0; i < num_samples_cast; i++) {
     //filters on!
     auto left_sample = samples_cast[i];
-    auto filtered = reverb_gain*do_filtering(left_sample);
-    samples_cast[i] = filtered + left_sample;
+    auto filtered = do_filtering(left_sample);
+    samples_cast[i] = filtered;
     ++i;
     auto right_sample = samples_cast[i];
-    filtered = reverb_gain*do_filtering(right_sample);
-    samples_cast[i] = filtered + right_sample;
+    filtered = do_filtering(right_sample);
+    samples_cast[i] = filtered;
   }
 
   return reinterpret_cast<uint8_t*>(samples);  
@@ -90,7 +90,8 @@ FilterProject::outType FilterProject::do_filtering(outType new_x) {
   d.push_front(temp);
 
   //add a bit of an FIR filter here, smooth the output
-  auto y = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*[3*2*2940];
+  auto reverb_signal = temp + 0.5*d[2*2940] + 0.25*d[2*2*2940] + 0.125*[3*2*2940];
+  auto y = 0.6*reverb_signal + new_x;
   return y;
 }
 
@@ -105,7 +106,7 @@ int main(int argc, char** argv) {
   //some constants
   const int BUFF_SIZE = 4096;
   array<uint8_t, BUFF_SIZE> buffer;
-  ReverbUnit reverb(0.25);
+  FilterProject reverb(0.25);
 
   for (;;) {
 
