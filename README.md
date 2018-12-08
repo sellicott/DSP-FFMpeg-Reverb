@@ -172,7 +172,10 @@ for both left and right audio samples
   //return the newest value for y
   return y;
 ```
+
 The delay line should be constructed in a way similar to how I did it in the FIRFilter code
+Note that the delay_buff from the previous code examples serves the same purpose as input_samples, 
+and they are constructed the same way.
 ```c++
 // the taps input are the coefficients for the FIR filter
 FIRFilter::FIRFilter(std::vector<float> taps_) :
