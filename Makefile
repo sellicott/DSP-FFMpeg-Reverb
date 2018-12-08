@@ -1,21 +1,28 @@
-snippets := ffmpeg_filter ffmpeg_decode ffmpeg_play
+SRC :=  FilterProject.cpp AllpassFilter.cpp FIRFilter.cpp
 
-all: $(snippets)
+.PHONY: clean
 
-clean:
-	rm -f $(snippets)
+SRC_OBJ := $(SRC:.cpp=.o)
 
-ffmpeg_decode: ffmpeg_decode.cpp Makefile
-	g++ -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavutil -lswresample
+.c.o:
+	g++ -c $(CFLAGS) $< -o $@
 
-ffmpeg_play: ffmpeg_play.cpp Makefile
-	g++ -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavdevice -lavutil
+.cpp.o:
+	g++ -c $(CXXFLAGS) $< -o $@
 
-ffmpeg_play_encoder: ffmpeg_play_encoder.cpp Makefile
-	g++ -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavdevice -lavutil
+all: $(SRC_OBJ) ffmpeg_decode ffmpeg_play ffmpeg_filter 
 
-ffmpeg_filter: FilterProject.cpp AllpassFilter.cpp FIRFilter.cpp FilterProject.h AllpassFilter.h FIRFilter.h Makefile
-	g++ -ggdb -O2 -o $@ FilterProject.cpp AllpassFilter.cpp FIRFilter.cpp 
+ffmpeg_decode: ffmpeg_decode.cpp ffmpeg_decode.o Makefile
+	g++ -ggdb -o $@ $@.o -lavformat -lavcodec -lavutil -lswresample
 
-#decode_audio: decode_audio.cpp Makefile
-#	gcc -ggdb -o $@ $@.cpp -lavformat -lavcodec -lavutil -lswresample
+ffmpeg_play: ffmpeg_play.cpp ffmpeg_play.o Makefile
+	g++ -ggdb -o $@ $@.o -lavformat -lavcodec -lavdevice -lavutil
+
+ffmpeg_play_encoder: ffmpeg_play_encoder.cpp ffmpeg_play_encoder.o Makefile
+	g++ -ggdb -o $@ $@.o -lavformat -lavcodec -lavdevice -lavutil
+
+ffmpeg_filter: $(SRC_OBJ) Makefile
+	g++ $(SRC_OBJ) -o ffmpeg_filter 
+
+clean: 
+	rm -f $(SRC_OBJ) ./ffmpeg_decode ./ffmpeg_filter ./ffmpeg_play *.o
