@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
   //some constants
   const int BUFF_SIZE = 4096;
   array<uint8_t, BUFF_SIZE> buffer;
-  FilterProject reverb(0.25);
+  FilterProject filter;
 
   for (;;) {
 
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     }
 
     // do the filtering
-    reverb.get_samples(buffer.data(), buffer.size());
+    filter.get_samples(buffer.data(), buffer.size());
 
     // write output buffer to stdout
     if (write(STDOUT_FILENO, buffer.data(), buffer.size()) != buffer.size()) {
