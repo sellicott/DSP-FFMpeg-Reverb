@@ -88,6 +88,22 @@ Steps to filtering goodness
   cp /media/pi/name_of_drive your_snazzy_audio_file.mp3 ./ 
   ```
 
+  If this doesn't work, you will need to mount your drive to the directory structure of the pi.
+
+  First check what drive name your USB drive is. This command will list all of the drives (the different letters),
+  and all the partitions on them (the numbers). You will want to remember the highest letter drive avalible
+  ```
+  ls /dev/sd??
+  ```
+
+  Now run the following command, replacing the question mark with the drive letter you found 
+  (it will probably be 'a' or 'b').
+  ```
+  sudo mount /dev/sd?1 /media/
+  cp /media/name_of_drive your_snazzy_audio_file.mp3 ./ 
+  ```
+  
+
 7. Now you can run your filter
   The decoder, filter, and playback programs must be connected via pipe.
   (A pipe takes the output from stdout from one program and "pipes" it into
