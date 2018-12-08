@@ -102,14 +102,59 @@ In the FilterProject.cpp file the function do_filtering implements the filters f
 (The main file calls another function get_samples() which calls do_filtering() in order to apply the filter to the buffer
 provided by the audio decoder program.) 
 
-In my project I used this function to chain togeter all of the other filters I used 
+I have made simple template for you to edit in Template.cpp and Template.h, when you want to compile it you shoud rename Template.cpp to FilterProject.cpp.
+This will allow the makefile to build your code instead of my example code (which implements reverb). All of the comments below apply to the template code as
+well.
+
+In my project (the reverb example) I used the do_filtering function to chain togeter all of the other filters I used 
 (four allpass filters and a few FIR filters). These filters are implemented as c++ objects, meaining they need to be instantiated 
 (they are defined near the end of FilterProject.h). I do this in the *base initilization section* 
 (right after the beginning of the constructor, you remember CS1220 don't you?) of the FilterProject class. 
 
 The actual filters for the project are implemented in the files 
-(AllpassFilter.cpp)[./AllpassFilter.cpp], (FIRFilter.cpp)[./FIRFilter.cpp] and their corresponding .h files (AllpassFilter.h)[./AllpassFilter.h]
-(FIRFilter.h)[./FIRFilter.h]. You can probably copy these files when implementing your own filters (or just use my FIR filter code as-is).
+AllpassFilter.cpp, FIRFilter.cpp and their corresponding .h files AllpassFilter.h and FIRFilter.h.
+You can probably copy these files when implementing your own filter classes (or just use my FIR filter code as-is).
 
 ## Implementing Filters
+This following code snippet initilizes my allpass filter (from AllpassFilter.cpp)
+```c++
+AllpassFilter::outType AllpassFilter::do_filtering(outType new_x) {
+  // grab the delay line
+  auto &g = *delay_buff.get();
+
+  //get the latest value to come through the delay line
+  auto g_out = g.back();
+  g.pop_back();
+
+  // do the thing! follows the standard allpass filter structure
+  auto g_in = new_x + gain*g_out;
+  g.push_front(g_in);
+  auto y = -gain*g_in + g_out;
+
+  //return the newest value for y
+  return y;
+}
+```
+
+In general an IIR implementation would look something like this 
+(Just implementing equation 4.110 and 4.111 from p269 of the textbook)
+note that the delay_buff deque needs to be 2x the lenth of your filter coefficients to make room
+for both left and right audio samples
+```c++
+  //find g[n] each delay is an index in the array 0 is the latest value n is the oldest value
+  //note that each index is multiplied by 2 because left and right audio samples are interleaved
+  //also note that g[1] is actually g[n-1], and g[3] is g[n-2], etc
+  auto n = g.size()/2; 
+  auto g_n = new_x + a1*g[1] + a2 * g[3] + /*...*/ a_n * g[2*n-1];
+
+  // pretty much the same thing here 
+  auto y = b0 * g_n + b1 * g[1] + /*...*/ b_n * g[3];
+
+  // add the value to the delay line
+  g.pop_back();
+  g.push_front(g_n);
+
+  //return the newest value for y
+  return y;
+```
 
