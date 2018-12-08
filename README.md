@@ -118,7 +118,7 @@ In the FilterProject.cpp file the function do_filtering implements the filters f
 (The main file calls another function get_samples() which calls do_filtering() in order to apply the filter to the buffer
 provided by the audio decoder program.) 
 
-I have made simple template for you to edit in Template.cpp and Template.h, when you want to compile it you shoud rename Template.cpp to FilterProject.cpp.
+**I have made simple template for you to edit in Template.cpp and Template.h, when you want to compile it you shoud rename Template.cpp to FilterProject.cpp.**
 This will allow the makefile to build your code instead of my example code (which implements reverb). All of the comments below apply to the template code as
 well.
 
