@@ -21,7 +21,7 @@ private:
 
 public:
   //constructor
-  FilterProject(float feedbackGain_ = 0.25);
+  FilterProject();
 
   // the decoder and playback programs need the take the samples in the form of 8-bit integers
   uint8_t* get_samples(uint8_t* samples, size_t num_samples);

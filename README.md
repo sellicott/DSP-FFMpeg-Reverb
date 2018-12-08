@@ -111,6 +111,21 @@ In my project (the reverb example) I used the do_filtering function to chain tog
 (they are defined near the end of FilterProject.h). I do this in the *base initilization section* 
 (right after the beginning of the constructor, you remember CS1220 don't you?) of the FilterProject class. 
 
+Here is an example (from Template.cpp)
+```c++
+FilterProject::FilterProject() : 
+  //initilize filters
+  allpassFilter(4410, 0.6), 
+
+  //add your comma separated filters to initilize here 
+
+  // pass in FIR coefficients to the FIR filter class
+  firFilter({ 0.5, 0.7, 0.5 /* Put your comma separated filter coefficients here */})
+
+  // note the last filter does not have a comma after it
+{}
+```
+
 The actual filters for the project are implemented in the files 
 AllpassFilter.cpp, FIRFilter.cpp and their corresponding .h files AllpassFilter.h and FIRFilter.h.
 You can probably copy these files when implementing your own filter classes (or just use my FIR filter code as-is).
@@ -157,4 +172,17 @@ for both left and right audio samples
   //return the newest value for y
   return y;
 ```
+The delay line should be constructed in a way similar to how I did it in the FIRFilter code
+```c++
+// the taps input are the coefficients for the FIR filter
+FIRFilter::FIRFilter(std::vector<float> taps_) :
+  // initilize the class taps variable.
+  taps(taps_)
+{
+  // multiply by 2 to make room for the L/R audio channels
+  delay = taps_.size()*2;
 
+  // initilize buffer to zeros
+  input_samples = std::make_unique<deque>(delay, 0.0);
+}
+```

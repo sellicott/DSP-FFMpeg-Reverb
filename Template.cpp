@@ -24,7 +24,7 @@ using std::uint8_t;
 using std::int16_t;
 
 // Constructor implementation
-FilterProject::FilterProject(float feedbackGain_) : 
+FilterProject::FilterProject() : 
   //initilize filters
   allpassFilter(4410, 0.6), 
 
