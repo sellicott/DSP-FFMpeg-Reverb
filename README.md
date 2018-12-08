@@ -21,9 +21,9 @@ playback program takes the samples and does magic on them so the linux audio sys
 it back.
 
 One gotcha is that since the files are typically stereo left and right samples are interleaved.
-this means that each buffer should be twice as long as designed, then every other index is used.
+this means that each buffer should be twice as long as designed, then every other index is used for each channel.
 For example to implement a 2nd order filter a buffer with a length of 6 is needed then indexes
-0, 2,and 4 will be used.
+0, 2,and 4 will be used for the left channel, and 1, 3, and 5 will be used for the right channel.
 
 **The filter should be implemented in the do_filtering() function.**
 
