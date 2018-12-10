@@ -100,7 +100,7 @@ Steps to filtering goodness
   (it will probably be 'a' or 'b').
   ```
   sudo mount /dev/sd?1 /media/
-  cp /media/name_of_drive your_snazzy_audio_file.mp3 ./ 
+  cp /media/name_of_drive/your_snazzy_audio_file.mp3 ./ 
   ```
   
 
@@ -121,6 +121,8 @@ provided by the audio decoder program.)
 **I have made simple template for you to edit in Template.cpp and Template.h, when you want to compile it you shoud rename Template.cpp to FilterProject.cpp.**
 This will allow the makefile to build your code instead of my example code (which implements reverb). All of the comments below apply to the template code as
 well.
+
+**If you add any more files to the project you will have to add them to the ```SRC :=``` line in the Makfile** 
 
 In my project (the reverb example) I used the do_filtering function to chain togeter all of the other filters I used 
 (four allpass filters and a few FIR filters). These filters are implemented as c++ objects, meaining they need to be instantiated 
