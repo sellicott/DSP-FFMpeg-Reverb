@@ -85,7 +85,7 @@ Steps to filtering goodness
   Your flash drive will be in the /media/pi/name_of_your_drive folder on the pi.
   Assuming that your file is on the root directory of your flash drive:
   ``` 
-  cp /media/pi/name_of_drive your_snazzy_audio_file.mp3 ./ 
+  cp /media/pi/name_of_drive/your_snazzy_audio_file.mp3 ./ 
   ```
 
   If this doesn't work, you will need to mount your drive to the directory structure of the pi.
