@@ -77,7 +77,11 @@ Steps to filtering goodness
   ```
   This will (hopefully) build all of the code needed to run your project.
 
-6. Now you need some great music: 
+6. Now you need some great music:
+
+  There are two methods for copying files to the pi: SSH or USB.
+  
+  USB:
 
   Put your files on a flash drive and connect the drive to the pi. Next, copy the files
   into the project directory.
@@ -103,6 +107,21 @@ Steps to filtering goodness
   cp /media/name_of_drive/your_snazzy_audio_file.mp3 ./ 
   ```
   
+  SSH:
+  
+  First, you will have to enable SSH on the pi. Do the following on the pi with a keybord and mouse connected.
+  Enter ```sudo raspi-config``` in a terminal window
+  Select ```Interfacing Options```
+  Navigate to and select ```SSH```
+  Choose ```Yes```
+  Select ```Ok```
+  Choose ```Finish```
+  
+  Now note down the pi's IP address by entering ```ifconfig``` and copying the number in the "eth0" section next to "inet". It should look something like "163.11.23x.xxx".
+  
+  Open WinSCP and enter your IP address in the host name section, then "pi" as the user name, and "raspberry" as the password.
+  
+  Now you can drag and drop to the right side, which should be showing your home directory.
 
 7. Now you can run your filter
   The decoder, filter, and playback programs must be connected via pipe.
