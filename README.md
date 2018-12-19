@@ -77,7 +77,11 @@ Steps to filtering goodness
   ```
   This will (hopefully) build all of the code needed to run your project.
 
-6. Now you need some great music: 
+6. Now you need some great music:
+
+  There are two methods for copying files to the pi: SSH or USB.
+  
+  USB:
 
   Put your files on a flash drive and connect the drive to the pi. Next, copy the files
   into the project directory.
@@ -85,7 +89,7 @@ Steps to filtering goodness
   Your flash drive will be in the /media/pi/name_of_your_drive folder on the pi.
   Assuming that your file is on the root directory of your flash drive:
   ``` 
-  cp /media/pi/name_of_drive your_snazzy_audio_file.mp3 ./ 
+  cp /media/pi/name_of_drive/your_snazzy_audio_file.mp3 ./ 
   ```
 
   If this doesn't work, you will need to mount your drive to the directory structure of the pi.
@@ -100,9 +104,24 @@ Steps to filtering goodness
   (it will probably be 'a' or 'b').
   ```
   sudo mount /dev/sd?1 /media/
-  cp /media/name_of_drive your_snazzy_audio_file.mp3 ./ 
+  cp /media/name_of_drive/your_snazzy_audio_file.mp3 ./ 
   ```
   
+  SSH:
+  
+  First, you will have to enable SSH on the pi. Do the following on the pi with a keybord and mouse connected.
+  Enter ```sudo raspi-config``` in a terminal window
+  Select ```Interfacing Options```
+  Navigate to and select ```SSH```
+  Choose ```Yes```
+  Select ```Ok```
+  Choose ```Finish```
+  
+  Now note down the pi's IP address by entering ```ifconfig``` and copying the number in the "eth0" section next to "inet". It should look something like "163.11.23x.xxx".
+  
+  Open WinSCP and enter your IP address in the host name section, then "pi" as the user name, and "raspberry" as the password.
+  
+  Now you can drag and drop to the right side, which should be showing your home directory.
 
 7. Now you can run your filter
   The decoder, filter, and playback programs must be connected via pipe.
@@ -121,6 +140,8 @@ provided by the audio decoder program.)
 **I have made simple template for you to edit in Template.cpp and Template.h, when you want to compile it you shoud rename Template.cpp to FilterProject.cpp.**
 This will allow the makefile to build your code instead of my example code (which implements reverb). All of the comments below apply to the template code as
 well.
+
+**If you add any more files to the project you will have to add them to the ```SRC :=``` line in the Makfile** 
 
 In my project (the reverb example) I used the do_filtering function to chain togeter all of the other filters I used 
 (four allpass filters and a few FIR filters). These filters are implemented as c++ objects, meaining they need to be instantiated 
