@@ -3,6 +3,10 @@ This project is heavily based on the work of github user gavv.
 His github repo is [here](https://github.com/gavv/snippets/tree/master/decode_play)
 see details in his [blog post](https://gavv.github.io/blog/decode-play/).
 
+If you want more in depth coverage about how my reverb unit works, checkout the article on 
+[my blag](https://nebkelectronics.wordpress.com/2019/05/07/c-reverb-dsp-final-project/)
+
+
 # Overview
 
 This project implements a digital filter in the time domain in c++.
@@ -131,6 +135,21 @@ Steps to filtering goodness
   ./ffmpeg_decode your_snazzy_audio_file.mp3 | ./ffmpeg_filter | ./ffmpeg_play 
   ```
   Note that the input audio file can be in almost any format.
+  
+  If you want to save the output of your filter to an mp3 file, substitute the following for ```./ffmpeg_play```
+  
+  ```
+  ffmpeg -f s16le -ar 44.1k -ac 2 -i pipe:0 <output_file>.mp3
+  ```
+
+  Explanation of the command:
+ * -f s16le sets the input audio format to signed 16bit little endian
+ * -ar 44.1k sets the input audio rate to 44.1k (might need changed based on the input file)
+ * -ac 2 sets the number of channels to 2 (might need changed)
+ * -i pipe:0 sets the input to be the standard input pipe (the previous command in the chain)
+
+ I don't think any of those settings will actually need changed, but there might be some files for which the output file sounds
+ strange.
 
 # The Code
 In the FilterProject.cpp file the function do_filtering implements the filters for the project.
